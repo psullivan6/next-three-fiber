@@ -1,0 +1,12 @@
+{
+  "include": "node_modules/three",
+  "presets": ["next/babel"],
+  "plugins": [
+    [
+      "styled-components",
+      {
+        "ssr": true
+      }
+    ]
+  ]
+}
