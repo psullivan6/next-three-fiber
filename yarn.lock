@@ -327,7 +327,7 @@
   dependencies:
     "@babel/helper-plugin-utils" "^7.0.0"
 
-"@babel/plugin-syntax-dynamic-import@7.2.0":
+"@babel/plugin-syntax-dynamic-import@7.2.0", "@babel/plugin-syntax-dynamic-import@^7.2.0":
   version "7.2.0"
   resolved "https://registry.yarnpkg.com/@babel/plugin-syntax-dynamic-import/-/plugin-syntax-dynamic-import-7.2.0.tgz#69c159ffaf4998122161ad8ebc5e6d1f55df8612"
   integrity sha512-mVxuJ0YroI/h/tbFTPGZR8cv6ai+STMKNBq0f8hFxsxWjl94qqhsb+wXbpNMDPU3cfR1TIsVFzU3nXyZMqyK4w==
@@ -1034,6 +1034,11 @@ amphtml-validator@1.0.23:
     colors "1.1.2"
     commander "2.9.0"
     promise "7.1.1"
+
+annyang@^2.6.1:
+  version "2.6.1"
+  resolved "https://registry.yarnpkg.com/annyang/-/annyang-2.6.1.tgz#93140d7014f268a9d6c4319505715b0469dec856"
+  integrity sha512-KfO6FVFmE7H7epXgAWRoGITShVqsDs6zLKuTxDiJHZmAVnpKeUAKiMUIr7hDXbNUOqRIB3RVTQQd/Yaf4ULauw==
 
 ansi-colors@^3.0.0:
   version "3.2.4"

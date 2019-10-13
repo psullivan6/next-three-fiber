@@ -1,53 +1,31 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { Fragment, useEffect, useState, useRef } from 'react';
 import * as THREE from 'three';
 import { Canvas, extend, useThree, useRender } from 'react-three-fiber';
 
 //
 // [TODO] Make these imports work w/o relative paths
 //
-import { GLTFLoader } from '../../node_modules/three/examples/jsm/loaders/GLTFLoader';
 import { OrbitControls } from '../../node_modules/three/examples/jsm/controls/OrbitControls';
 //
 //
+import useGLTFModel from '../../components/GL/useGLTFModel';
+import useGLDebugger from '../../components/GL/useGLDebugger';
 
 import styled from 'styled-components';
 
 extend({ OrbitControls });
 
-// Models
-// const path = 'https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/models/gltf/Duck/glTF/Duck.gltf';
-const path = '/1970_pontiac_firebird_trans_am/scene.gltf';
+const getRandomColor = () =>
+  '#' + (0x1000000 + Math.random() * 0xffffff).toString(16).substr(1, 6);
 
 // Styles
 const CanvasContainer = styled.div`
   width: 100%;
   height: 400px;
-  background: beige;
+  background: ${({ backgroundColor }) => backgroundColor};
 `;
 
 const pixelRatio = typeof window !== 'undefined' ? window.devicePixelRatio : 2;
-
-const Thing = ({ onClick }) => {
-  const ref = useRef();
-  // useFrame(() => (ref.current.rotation.z += 0.01));
-
-  return (
-    <mesh
-      ref={ref}
-      onClick={onClick}
-      onPointerOver={e => console.log('hover')}
-      onPointerOut={e => console.log('unhover')}
-    >
-      <planeBufferGeometry attach="geometry" args={[1, 1]} />
-      <meshBasicMaterial
-        attach="material"
-        color="hotpink"
-        opacity={0.5}
-        transparent
-      />
-    </mesh>
-  );
-};
 
 const Controls = props => {
   const { camera } = useThree();
@@ -58,48 +36,75 @@ const Controls = props => {
   return <orbitControls ref={controls} args={[camera]} {...props} />;
 };
 
+const SceneStuff = ({ children }) => {
+  useGLDebugger(THREE);
+
+  return (
+    <Fragment>
+      <ambientLight intensity={30.5} />
+      <spotLight intensity={0.8} position={[200, 200, 0]} />
+      <Controls
+        enableDamping
+        enablePan={false}
+        dampingFactor={0.1}
+        rotateSpeed={0.5}
+        maxPolarAngle={Math.PI / 2}
+      />
+      {children}
+    </Fragment>
+  );
+};
+
+const listenForCommands = ({ setBackgroundColor }) => {
+  const commands = {
+    'change color': () => {
+      setBackgroundColor(getRandomColor());
+    }
+  };
+
+  if (typeof window !== 'undefined') {
+    import('annyang').then(annyang => {
+      // Add our commands to annyang
+      annyang.addCommands(commands);
+
+      // Start listening.
+      annyang.start();
+    });
+  }
+};
+
+const stopListeningForCommands = () => {
+  // [TODO] Destroy annyang
+};
+
 const TestPage = () => {
-  const [scene, setScene] = useState();
-  // const scene = useRef();
+  const [backgroundColor, setBackgroundColor] = useState('beige');
+  const { Component: FirebirdModel, hasLoaded } = useGLTFModel({
+    path: '/1970_pontiac_firebird_trans_am/scene.gltf'
+  });
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      window.THREE = THREE;
-      new GLTFLoader().load(path, ({ scene: loadedScene }) => {
-        setScene(loadedScene);
-        window.THREE = THREE;
-        window.scene = loadedScene;
-        // console.log('loadedScene', loadedScene);
-        // scene.current = loadedScene;
-      });
-    }
+    listenForCommands({ backgroundColor, setBackgroundColor });
+    return () => {
+      stopListeningForCommands();
+    };
   }, []);
 
-  console.log('scene', scene);
-
-  if (scene == null) {
+  if (!hasLoaded) {
     return <h1>Loading...</h1>;
   }
-
-  const SceneComponent = scene;
-  console.log('TEST PAGE', scene);
 
   return (
     <section>
       <h1>Here's the canvas</h1>
-      <CanvasContainer>
-        <Canvas pixelRatio={pixelRatio}>
-          {/* <Thing /> */}
-          <ambientLight intensity={30.5} />
-          <spotLight intensity={0.8} position={[200, 200, 0]} />
-          <Controls
-            enableDamping
-            enablePan={false}
-            dampingFactor={0.1}
-            rotateSpeed={0.5}
-            maxPolarAngle={Math.PI / 2}
-          />
-          <primitive object={scene} />
+      <CanvasContainer backgroundColor={backgroundColor}>
+        <Canvas
+          camera={{ fov: 40, position: [0, 200, -300] }}
+          pixelRatio={pixelRatio}
+        >
+          <SceneStuff>
+            <FirebirdModel position={[60, -90, -40]} />
+          </SceneStuff>
         </Canvas>
       </CanvasContainer>
     </section>
